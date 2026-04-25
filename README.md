@@ -1,50 +1,82 @@
-# Welcome to your Expo app 👋
+# Weathermar
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native weather app built with Expo and TypeScript as a learning project.
 
-## Get started
+## Purpose
+
+This project is being built to learn and practice:
+
+- React Native
+- Expo
+- TypeScript
+- component-based UI design
+- React state and effects
+- loading and error states
+- mapping API data into app-specific data shapes
+- real API integration with Open-Meteo
+
+The long-term goal is to evolve this into a more hurricane-focused weather app, with possible NOAA/NWS integration later.
+
+## Current Features
+
+- Current weather section
+- 7-day forecast
+- Loading state
+- Error state
+- Real weather data fetched from Open-Meteo
+- Scrollable mobile layout
+- Reusable UI components for current conditions and forecast rows
+
+## Tech Stack
+
+- React Native
+- Expo
+- TypeScript
+- Open-Meteo Forecast API
+
+## Project Structure
+
+- `HomeScreen` manages:
+  - current weather state
+  - forecast state
+  - loading state
+  - error state
+- `CurrentWeatherSection` renders the current conditions card
+- `ForecastRow` renders each daily forecast card
+
+## Learning Notes
+
+This project started with fully hardcoded mock data, then gradually added:
+
+1. reusable components
+2. mapped forecast rows from arrays
+3. scrollable layout with `ScrollView`
+4. React state with `useState`
+5. side effects with `useEffect`
+6. loading and error handling
+7. real API fetches from Open-Meteo
+8. transformation of raw API data into clean UI-ready objects
+
+The app currently uses a hardcoded Wilmington, NC location while the weather-fetching flow is being built out.
+
+## Future Improvements
+
+- Search by city using geocoding
+- Device location support
+- Better date/time formatting
+- Weather condition icons
+- Unit toggles
+- NOAA / NWS alert integration
+- Hurricane-focused features and data sources
+- Better styling and responsive layout cleanup
+- Testing
+
+## Running the App
 
 1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+2. Start the Expo development server
+3. Open on Android with Expo Go
 
 ```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+npm install
+npx expo start
