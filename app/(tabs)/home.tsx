@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 
@@ -122,7 +123,7 @@ function CurrentWeatherSection({location, day, date, time, currenttemp, feelslik
                 <ThemedView style={todaybox.details}>
                 <ThemedText style={todaybox.smalltext}>Humidity: {currenthumidity}%</ThemedText>    
                 <ThemedText style={todaybox.smalltext}>Overall Precip Chance: {overallrainchance}%</ThemedText>
-                <ThemedText style={todaybox.smalltext}>Today's High/Low: {hightemp}{"\u00B0"}F / {lowtemp}{"\u00B0"}F</ThemedText>
+                <ThemedText style={todaybox.smalltext}>Today&apos;s High/Low: {hightemp}{"\u00B0"}F / {lowtemp}{"\u00B0"}F</ThemedText>
                 
                 </ThemedView>
             </ThemedView>
@@ -148,16 +149,6 @@ function ErrorCurrent() {
             </ThemedText>
         </ThemedView>
     )
-}
-
-async function tryFetchWeatherData() {
-
-    return {
-        success: true,
-        currentWeatherData: current_weather_data_default,
-        forecastData: forecast_data_default,
-        errorData: "",
-    };
 }
 
 
@@ -204,8 +195,12 @@ export default function HomeScreen() {
             setError("");
 
             try {
-                const latitude = 34.2257;
-                const longitude = -77.9447;
+                const storedLat = await AsyncStorage.getItem('weatherLat');
+                const storedLon = await AsyncStorage.getItem('weatherLon');
+                const storedLocation = await AsyncStorage.getItem('weatherLocation');
+                const latitude = storedLat ? parseFloat(storedLat) : 34.2257;
+                const longitude = storedLon ? parseFloat(storedLon) : -77.9447;
+                const location = storedLocation || "Wilmington, NC";
 
                 const url =
                     `https://api.open-meteo.com/v1/forecast` +
@@ -222,7 +217,7 @@ export default function HomeScreen() {
                 const [year, month, day] = rawData.current.time.split("T")[0].split("-").map(Number);
                 const localDate = new Date(year, month - 1, day);
                 const newCurrentWeatherData = {   
-                        location: "Wilmington, NC",
+                        location: location,
                         day: localDate.toLocaleDateString("en-US", { weekday: "long" }),
                         date: localDate.toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "numeric" }),
                         time: new Date(rawData.current.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase(),
