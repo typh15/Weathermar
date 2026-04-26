@@ -1,11 +1,11 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useEffect, useState } from 'react';
+import { ScrollView, StyleSheet } from 'react-native';
 
-
+const update_interval = 1 ; // N minutes
 
 
 const forecast_data_default = [
@@ -78,9 +78,9 @@ const current_weather_data_default = {location: "Wilmington, NC",
                  
 
 type CurrentWeatherDataTypes = {
-    location: string; 
+    location: string;
     day: string;
-    date: string; 
+    date: string;
     time: string;
     currenttemp: number;
     feelslike: number;
@@ -152,6 +152,42 @@ function ErrorCurrent() {
 }
 
 
+function formatCurrentWeatherData(rawData: any, location: string): CurrentWeatherDataTypes {
+    const [year, month, day] = rawData.current.time.split("T")[0].split("-").map(Number);
+    const localDate = new Date(year, month - 1, day);
+    return ({   
+        location: location,
+        day: localDate.toLocaleDateString("en-US", { weekday: "long" }),
+        date: localDate.toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "numeric" }),
+        time: new Date(rawData.current.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase(),
+        currenttemp: Math.round(rawData.current.temperature_2m),
+        feelslike: Math.round(rawData.current.apparent_temperature),
+        currentrainchance: rawData.current.precipitation_probability,
+        currenthumidity: rawData.current.relative_humidity_2m,
+        overallrainchance: rawData.daily.precipitation_probability_max[0],
+        hightemp: Math.round(rawData.daily.temperature_2m_max[0]),
+        lowtemp: Math.round(rawData.daily.temperature_2m_min[0]),
+    })};
+
+function formatForecastData(rawData: any): { key: number; day: string; date: string; hightemp: number; lowtemp: number; rainchance: number; }[] {
+    return rawData.daily.time.slice(1).map((date: string, index: number) => {
+        const [year, month, dayNum] = date.split("-").map(Number);
+        const localDate = new Date(year, month - 1, dayNum);
+
+        return {
+            key: index,
+            day: localDate.toLocaleDateString("en-US", { weekday: "long" }),
+            date: `${month}/${dayNum}/${year}`,
+            hightemp: Math.round(rawData.daily.temperature_2m_max[index]),
+            lowtemp: Math.round(rawData.daily.temperature_2m_min[index]),
+            rainchance: rawData.daily.precipitation_probability_max[index],
+        };
+    });
+}
+
+
+                
+
 export default function HomeScreen() {
     const [currentWeatherData, setCurrentWeatherData] = useState(current_weather_data_default);
     const [forecastData, setForecastData] = useState(forecast_data_default);
@@ -189,86 +225,68 @@ export default function HomeScreen() {
         throw lastError;
     }
 
-    useEffect(() => {
-        async function loadWeather() {
-            setLoading(true);
-            setError("");
+    const loadWeather = useCallback(async () => {
+                setLoading(true);
+                setError("");
 
-            try {
-                const storedLat = await AsyncStorage.getItem('weatherLat');
-                const storedLon = await AsyncStorage.getItem('weatherLon');
-                const storedLocation = await AsyncStorage.getItem('weatherLocation');
-                const latitude = storedLat ? parseFloat(storedLat) : 34.2257;
-                const longitude = storedLon ? parseFloat(storedLon) : -77.9447;
-                const location = storedLocation || "Wilmington, NC";
+                try {
+                    const storedLat = await AsyncStorage.getItem('weatherLat');
+                    const storedLon = await AsyncStorage.getItem('weatherLon');
+                    const storedLocation = await AsyncStorage.getItem('weatherLocation');
+                    const latitude = storedLat ? parseFloat(storedLat) : 34.2257;
+                    const longitude = storedLon ? parseFloat(storedLon) : -77.9447;
+                    const location = storedLocation?.split(', ').slice(0, 2).join(', ') || "";
 
-                const url =
-                    `https://api.open-meteo.com/v1/forecast` +
-                    `?latitude=${latitude}` +
-                    `&longitude=${longitude}` +
-                    `&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation_probability` +
-                    `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max` +
-                    `&temperature_unit=fahrenheit` +
-                    `&timezone=auto`;
+                    const url =
+                        `https://api.open-meteo.com/v1/forecast` +
+                        `?latitude=${latitude}` +
+                        `&longitude=${longitude}` +
+                        `&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation_probability` +
+                        `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max` +
+                        `&temperature_unit=fahrenheit` +
+                        `&timezone=auto`;
 
-                const rawData = await fetchWeatherWithRetry(url, 8);
-                // const rawData = await response.json();
-                console.log(rawData);
-                const [year, month, day] = rawData.current.time.split("T")[0].split("-").map(Number);
-                const localDate = new Date(year, month - 1, day);
-                const newCurrentWeatherData = {   
-                        location: location,
-                        day: localDate.toLocaleDateString("en-US", { weekday: "long" }),
-                        date: localDate.toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "numeric" }),
-                        time: new Date(rawData.current.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase(),
-                        currenttemp: Math.round(rawData.current.temperature_2m),
-                        feelslike: Math.round(rawData.current.apparent_temperature),
-                        currentrainchance: rawData.current.precipitation_probability,
-                        currenthumidity: rawData.current.relative_humidity_2m,
-                        overallrainchance: rawData.daily.precipitation_probability_max[0],
-                        hightemp: Math.round(rawData.daily.temperature_2m_max[0]),
-                        lowtemp: Math.round(rawData.daily.temperature_2m_min[0]),
-                };
-                
-                const newForecastData = rawData.daily.time.slice(1).map((date: string, index: number) => {
-                    const [year, month, dayNum] = date.split("-").map(Number);
-                    const localDate = new Date(year, month - 1, dayNum);
+                    const rawData = await fetchWeatherWithRetry(url, 8);
+                    // const rawData = await response.json();
+                    console.log(rawData);
+                    
+                    const newCurrentWeatherData = formatCurrentWeatherData(rawData, location);   
+                    const newForecastData = formatForecastData(rawData);
 
-                    return {
-                        key: index,
-                        day: localDate.toLocaleDateString("en-US", { weekday: "long" }),
-                        date: `${month}/${dayNum}/${year}`,
-                        hightemp: Math.round(rawData.daily.temperature_2m_max[index]),
-                        lowtemp: Math.round(rawData.daily.temperature_2m_min[index]),
-                        rainchance: rawData.daily.precipitation_probability_max[index],
-                    };
-                });
-
-
-                // temporary: keep defaults for now until transform step
-                setCurrentWeatherData(newCurrentWeatherData);
-                setForecastData(newForecastData);
-            } 
+                    // temporary: keep defaults for now until transform step
+                    setCurrentWeatherData(newCurrentWeatherData);
+                    setForecastData(newForecastData);
+                } 
 
 
 
-            catch (err) {
-                setError(err instanceof Error ? err.message : "Unknown error");
-                console.error(err);
-            } 
+                catch (err) {
+                    setError(err instanceof Error ? err.message : "Unknown error");
+                    console.error(err);
+                } 
 
 
-            finally {
-                setLoading(false);
-            }
-        }
-        loadWeather();
-        const intervalId = setInterval(() => 
-            {loadWeather();}, 1 * 60 * 1000);
-
-        return () => clearInterval(intervalId);
-
+                finally {
+                    setLoading(false);
+                }
     }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            loadWeather();
+        }, [loadWeather])
+        );
+
+     useEffect(() => {
+  loadWeather();
+
+  const intervalId = setInterval(() => {
+    loadWeather();
+  }, update_interval * 60 * 1000);
+
+  return () => clearInterval(intervalId);
+}, [loadWeather]);
+
 
     let currentContent;
 

@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -40,33 +40,51 @@ export default function TabTwoScreen() {
       console.error('Failed to save location:', error);
     }
   };
+async function fetchSuggestions(query: string) {
+  if (query.length < 3) {
+    setSuggestions([]);
+    return;
+  }
 
-  const fetchSuggestions = async (query: string) => {
-    if (query.length < 3) {
-      setSuggestions([]);
-      return;
+  try {
+    const url =
+      `https://geocoding-api.open-meteo.com/v1/search` +
+      `?name=${encodeURIComponent(query)}` +
+      `&count=5` +
+      `&language=en`;
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
     }
-    try {
-      const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5`, {
-        headers: {
-          'User-Agent': 'WeatherMar/1.0',
-        },
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+
+    const data = await response.json();
+
+    const sugg = (data.results ?? []).map((item: any) => {
+      const locationParts = [item.name];
+
+      if (item.admin1 && item.admin1 !== item.name) {
+        locationParts.push(item.admin1);
       }
-      const data = await response.json();
-      const sugg = data.features.map((item: any) => ({
-        display_name: item.properties.name + (item.properties.city ? ', ' + item.properties.city : '') + (item.properties.country ? ', ' + item.properties.country : ''),
-        lat: item.geometry.coordinates[1],
-        lon: item.geometry.coordinates[0],
-      }));
-      setSuggestions(sugg);
-    } catch (error) {
-      console.error('Failed to fetch suggestions:', error);
-      setSuggestions([]);
-    }
-  };
+
+      if (item.country) {
+        locationParts.push(item.country);
+      }
+
+      return {
+        display_name: locationParts.join(', '),
+        lat: item.latitude,
+        lon: item.longitude,
+      };
+    });
+
+    setSuggestions(sugg);
+  } catch (error) {
+    console.error('Failed to fetch suggestions:', error);
+    setSuggestions([]);
+  }
+}
 
   const handleTextChange = (text: string) => {
     setLocation(text);
@@ -99,13 +117,13 @@ export default function TabTwoScreen() {
                     placeholder="Enter location (e.g., City, State)"
                 />
                 {suggestions.length > 0 && (
-                    <View style={locationStyles.suggestionsList}>
+                    <ScrollView style={locationStyles.suggestionsList} nestedScrollEnabled>
                         {suggestions.map((item, index) => (
                             <TouchableOpacity key={index} onPress={() => selectSuggestion(item)} style={locationStyles.suggestionItem}>
                                 <ThemedText style={locationStyles.suggestionText}>{item.display_name}</ThemedText>
                             </TouchableOpacity>
                         ))}
-                    </View>
+                    </ScrollView>
                 )}
             </ThemedView>
         </ThemedView>
@@ -155,17 +173,21 @@ const locationStyles = StyleSheet.create({
     borderRadius: 4,
   },
   suggestionsList: {
-    maxHeight: 150,
+    maxHeight: 180,
+    width: '100%',
     backgroundColor: '#ffffff',
     borderRadius: 4,
     marginTop: 4,
+    overflow: 'hidden',
   },
   suggestionItem: {
-    padding: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },
   suggestionText: {
     fontSize: 16,
+    color: '#11181C',
   },
 });
