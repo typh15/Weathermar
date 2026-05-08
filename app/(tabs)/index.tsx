@@ -2,10 +2,12 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { Pressable, ScrollView, StyleSheet } from 'react-native';
 
-const update_interval = 1 ; // N minutes
+
+const update_interval = 10 ; // N minutes
 
 
 const forecast_data_default = [
@@ -24,21 +26,24 @@ type ForecastRowProps = {
     hightemp: number;
     lowtemp: number;
     rainchance: number;
+    onPress?: () => void;
 };
 
-function ForecastRow({ day, date, hightemp, lowtemp, rainchance }: ForecastRowProps) {
+function ForecastRow({ day, date, hightemp, lowtemp, rainchance, onPress}: ForecastRowProps) {
     return (
-        <ThemedView style={weatherbox.weathercard}>
-            <ThemedText style={weatherbox.daydatetext}>
-                {day} - {date}
-            </ThemedText>
-            <ThemedText style={weatherbox.weatherdatatext}>
-                Temp High/Low: {hightemp}{"\u00B0"}F / {lowtemp}{"\u00B0"}F
-            </ThemedText>
-            <ThemedText style={weatherbox.weatherdatatext}>
-                Precip Chance: {rainchance}%
-            </ThemedText>
-        </ThemedView>
+        <Pressable onPress={onPress}>
+            <ThemedView style={weatherbox.weathercard}>
+                <ThemedText style={weatherbox.daydatetext}>
+                    {day} - {date}
+                </ThemedText>
+                <ThemedText style={weatherbox.weatherdatatext}>
+                    Temp High/Low: {hightemp}{"\u00B0"}F / {lowtemp}{"\u00B0"}F
+                </ThemedText>
+                <ThemedText style={weatherbox.weatherdatatext}>
+                    Precip Chance: {rainchance}%
+                </ThemedText>
+            </ThemedView>
+        </Pressable>
     )
 }
 
@@ -89,45 +94,47 @@ type CurrentWeatherDataTypes = {
     overallrainchance: number;
     hightemp: number;
     lowtemp: number;
+    onPress?: () => void;
 };
 
 function CurrentWeatherSection({location, day, date, time, currenttemp, feelslike, 
                                 currentrainchance, currenthumidity, overallrainchance, 
-                                hightemp, lowtemp}: CurrentWeatherDataTypes) {
+                                hightemp, lowtemp, onPress}: CurrentWeatherDataTypes) {
     return (
-        <ThemedView style={todaybox.outertodaycard}>  
+        <Pressable onPress={onPress}>
+            <ThemedView style={todaybox.outertodaycard}>  
+                <ThemedText style={todaybox.daydatetext}>
+                    {location}{"\n"}
+                    {time}, {day} - {date}
+                </ThemedText>
 
-            <ThemedText style={todaybox.daydatetext}>
-                {location}{"\n"}
-                {time}, {day} - {date}
-            </ThemedText>
+                <ThemedView style={todaybox.innertodaycard}>
+                    <ThemedView style={todaybox.highlights}>
 
-            <ThemedView style={todaybox.innertodaycard}>
-                <ThemedView style={todaybox.highlights}>
-
-                    <ThemedText style={todaybox.temptext}>
-                        {currenttemp}{"\u00B0"}F          
-                    </ThemedText>
-
-                    <ThemedView style={todaybox.highlightsinner}>
-                        <ThemedText style={todaybox.detailstext}>
-                            Feels Like: {feelslike}{"\u00B0"}F
+                        <ThemedText style={todaybox.temptext}>
+                            {currenttemp}{"\u00B0"}F          
                         </ThemedText>
-                        <ThemedText style={todaybox.detailstext}>
-                            Precip Chance: {currentrainchance}%
-                        </ThemedText>
+
+                        <ThemedView style={todaybox.highlightsinner}>
+                            <ThemedText style={todaybox.detailstext}>
+                                Feels Like: {feelslike}{"\u00B0"}F
+                            </ThemedText>
+                            <ThemedText style={todaybox.detailstext}>
+                                Precip Chance: {currentrainchance}%
+                            </ThemedText>
+                        </ThemedView>
+
                     </ThemedView>
 
-                </ThemedView>
-
-                <ThemedView style={todaybox.details}>
-                <ThemedText style={todaybox.smalltext}>Humidity: {currenthumidity}%</ThemedText>    
-                <ThemedText style={todaybox.smalltext}>Overall Precip Chance: {overallrainchance}%</ThemedText>
-                <ThemedText style={todaybox.smalltext}>Today&apos;s High/Low: {hightemp}{"\u00B0"}F / {lowtemp}{"\u00B0"}F</ThemedText>
-                
+                    <ThemedView style={todaybox.details}>
+                    <ThemedText style={todaybox.smalltext}>Humidity: {currenthumidity}%</ThemedText>    
+                    <ThemedText style={todaybox.smalltext}>Overall Precip Chance: {overallrainchance}%</ThemedText>
+                    <ThemedText style={todaybox.smalltext}>Today&apos;s High/Low: {hightemp}{"\u00B0"}F / {lowtemp}{"\u00B0"}F</ThemedText>
+                    
+                    </ThemedView>
                 </ThemedView>
             </ThemedView>
-        </ThemedView>
+        </Pressable>
     )
 }
 
@@ -178,9 +185,9 @@ function formatForecastData(rawData: any): { key: number; day: string; date: str
             key: index,
             day: localDate.toLocaleDateString("en-US", { weekday: "long" }),
             date: `${month}/${dayNum}/${year}`,
-            hightemp: Math.round(rawData.daily.temperature_2m_max[index]),
-            lowtemp: Math.round(rawData.daily.temperature_2m_min[index]),
-            rainchance: rawData.daily.precipitation_probability_max[index],
+            hightemp: Math.round(rawData.daily.temperature_2m_max[index + 1]),
+            lowtemp: Math.round(rawData.daily.temperature_2m_min[index + 1]),
+            rainchance: rawData.daily.precipitation_probability_max[index + 1],
         };
     });
 }
@@ -193,6 +200,8 @@ export default function HomeScreen() {
     const [forecastData, setForecastData] = useState(forecast_data_default);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
+    const router = useRouter();
 
     function sleep(ms: number) {
         return new Promise((resolve) => setTimeout(resolve, ms));
@@ -226,76 +235,76 @@ export default function HomeScreen() {
     }
 
     const loadWeather = useCallback(async () => {
-                setLoading(true);
-                setError("");
+        console.log("loadWeather called");
+        setLoading(true);
+        setError("");
 
-                try {
-                    const storedLat = await AsyncStorage.getItem('weatherLat');
-                    const storedLon = await AsyncStorage.getItem('weatherLon');
-                    const storedLocation = await AsyncStorage.getItem('weatherLocation');
-                    const latitude = storedLat ? parseFloat(storedLat) : 34.2257;
-                    const longitude = storedLon ? parseFloat(storedLon) : -77.9447;
-                    const location = storedLocation?.split(', ').slice(0, 2).join(', ') || "";
+        try {
+            const storedLat = await AsyncStorage.getItem('weatherLat');
+            const storedLon = await AsyncStorage.getItem('weatherLon');
+            const storedLocation = await AsyncStorage.getItem('weatherLocation');
+            const latitude = storedLat ? parseFloat(storedLat) : 34.2257;
+            const longitude = storedLon ? parseFloat(storedLon) : -77.9447;
+            const location = storedLocation?.split(', ').slice(0, 2).join(', ') || "Wilmington, NC";
 
-                    const url =
-                        `https://api.open-meteo.com/v1/forecast` +
-                        `?latitude=${latitude}` +
-                        `&longitude=${longitude}` +
-                        `&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation_probability` +
-                        `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max` +
-                        `&temperature_unit=fahrenheit` +
-                        `&timezone=auto`;
+            const url =
+                `https://api.open-meteo.com/v1/forecast` +
+                `?latitude=${latitude}` +
+                `&longitude=${longitude}` +
+                `&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation_probability` +
+                `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max` +
+                `&temperature_unit=fahrenheit` +
+                `&timezone=auto`;
 
-                    const rawData = await fetchWeatherWithRetry(url, 8);
-                    // const rawData = await response.json();
-                    console.log(rawData);
-                    
-                    const newCurrentWeatherData = formatCurrentWeatherData(rawData, location);   
-                    const newForecastData = formatForecastData(rawData);
+            const rawData = await fetchWeatherWithRetry(url, 8);
+            // const rawData = await response.json();
+            console.log(rawData);
+            
+            const newCurrentWeatherData = formatCurrentWeatherData(rawData, location);   
+            const newForecastData = formatForecastData(rawData);
 
-                    // temporary: keep defaults for now until transform step
-                    setCurrentWeatherData(newCurrentWeatherData);
-                    setForecastData(newForecastData);
-                } 
+            // temporary: keep defaults for now until transform step
+            setCurrentWeatherData(newCurrentWeatherData);
+            setForecastData(newForecastData);
+        } 
 
+        catch (err) {
+            setError(err instanceof Error ? err.message : "Unknown error");
+            console.error(err);
+        } 
 
-
-                catch (err) {
-                    setError(err instanceof Error ? err.message : "Unknown error");
-                    console.error(err);
-                } 
-
-
-                finally {
-                    setLoading(false);
-                }
+        finally {
+            setLoading(false);
+        }
     }, []);
 
     useFocusEffect(
         useCallback(() => {
             loadWeather();
         }, [loadWeather])
-        );
+    );
 
-     useEffect(() => {
-  loadWeather();
+    useEffect(() => {
 
-  const intervalId = setInterval(() => {
-    loadWeather();
-  }, update_interval * 60 * 1000);
+        const intervalId = setInterval(() => {
+            loadWeather();
+        }, update_interval * 60 * 1000);
 
-  return () => clearInterval(intervalId);
-}, [loadWeather]);
+        return () => clearInterval(intervalId);
+    }, [loadWeather]);
 
 
     let currentContent;
+    let forecastContent;
 
     if (loading) {
         currentContent = <LoadingCurrent />;
+        forecastContent = <LoadingForecastRow />;
     } 
 
     else if (error !== "") {
         currentContent = <ErrorCurrent />;
+        forecastContent = <ErrorForecastRow />;
     } 
 
     else {
@@ -309,20 +318,12 @@ export default function HomeScreen() {
                                                 currenthumidity={currentWeatherData.currenthumidity}
                                                 overallrainchance={currentWeatherData.overallrainchance}
                                                 hightemp={currentWeatherData.hightemp}
-                                                lowtemp={currentWeatherData.lowtemp} />;
-    }
+                                                lowtemp={currentWeatherData.lowtemp}
+                                                onPress={() => router.push({
+                                                    pathname: '/hourly',
+                                                    params: { date: currentWeatherData.date }
+                                                })} />;
 
-    let forecastContent;
-
-    if (loading) {
-        forecastContent = <LoadingForecastRow />;
-    } 
-
-    else if (error !== "") {
-        forecastContent = <ErrorForecastRow />;
-    } 
-
-    else {
         forecastContent = forecastData.map((forecast) => (
         <ForecastRow
             key={forecast.key}
@@ -331,15 +332,14 @@ export default function HomeScreen() {
             hightemp={forecast.hightemp}
             lowtemp={forecast.lowtemp}
             rainchance={forecast.rainchance}
+            onPress={() => router.push({
+                pathname: '/hourly',
+                params: { date: forecast.date }
+            })} 
         />
       ));
     }
 
-
-
-
-
-    
     return (
         <ScrollView>
             <ThemedView style={screenstyles.screenstyle}>
@@ -464,7 +464,6 @@ const weatherbox = StyleSheet.create({
     marginLeft:32,
     marginRight:32,
   },
-  
   daydatetext: {
       fontSize:20,
       marginLeft: 0,
