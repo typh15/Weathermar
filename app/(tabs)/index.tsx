@@ -320,7 +320,7 @@ export default function HomeScreen() {
                                                 hightemp={currentWeatherData.hightemp}
                                                 lowtemp={currentWeatherData.lowtemp}
                                                 onPress={() => router.push({
-                                                    pathname: '/hourly',
+                                                    pathname: '../../hourly',
                                                     params: { date: currentWeatherData.date }
                                                 })} />;
 
@@ -333,7 +333,7 @@ export default function HomeScreen() {
             lowtemp={forecast.lowtemp}
             rainchance={forecast.rainchance}
             onPress={() => router.push({
-                pathname: '/hourly',
+                pathname: '../../hourly',
                 params: { date: forecast.date }
             })} 
         />

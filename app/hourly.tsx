@@ -11,33 +11,34 @@ const update_interval = 1 ; // N minutes
         summary: string;
         icon: any;
 };
+
 const TestweatherIcons = {
-  clear: require("../../assets/images/AiryWeatherIcons/clear.png"),
+  clear: require(                 "../assets/images/AiryWeatherIcons/clear.png"),
 };
 
 
 const weatherIcons = {
-    clear: require("../../assets/images/AiryWeatherIcons/clear.png"),
-    mostlyClear: require("../../assets/images/AiryWeatherIcons/mostly-clear.png"),
-    partlyCloudy: require("../../assets/images/AiryWeatherIcons/partly-cloudy.png"),
-    overcast: require("../../assets/images/AiryWeatherIcons/overcast.png"),
-    fog: require("../../assets/images/AiryWeatherIcons/fog.png"),
-    rimeFog: require("../../assets/images/AiryWeatherIcons/rime-fog.png"),
-    lightDrizzle: require("../../assets/images/AiryWeatherIcons/light-drizzle.png"),
-    moderateDrizzle: require("../../assets/images/AiryWeatherIcons/moderate-drizzle.png"),
-    denseDrizzle: require("../../assets/images/AiryWeatherIcons/dense-drizzle.png"),
-    lightFreezingDrizzle: require("../../assets/images/AiryWeatherIcons/light-freezing-drizzle.png"),
-    denseFreezingDrizzle: require("../../assets/images/AiryWeatherIcons/dense-freezing-drizzle.png"),
-    lightRain: require("../../assets/images/AiryWeatherIcons/light-rain.png"),
-    moderateRain: require("../../assets/images/AiryWeatherIcons/moderate-rain.png"),
-    heavyRain: require("../../assets/images/AiryWeatherIcons/heavy-rain.png"),
-    lightFreezingRain: require("../../assets/images/AiryWeatherIcons/light-freezing-rain.png"),
-    heavyFreezingRain: require("../../assets/images/AiryWeatherIcons/heavy-freezing-rain.png"),
-    slightSnowfall: require("../../assets/images/AiryWeatherIcons/slight-snowfall.png"),
-    moderateSnowfall: require("../../assets/images/AiryWeatherIcons/moderate-snowfall.png"),
-    heavySnowfall: require("../../assets/images/AiryWeatherIcons/heavy-snowfall.png"),
-    thunderstorm: require("../../assets/images/AiryWeatherIcons/thunderstorm.png"),
-    thunderstormWithHail: require("../../assets/images/AiryWeatherIcons/thunderstorm-with-hail.png"),
+    clear: require(               "../assets/images/AiryWeatherIcons/clear.png"),
+    mostlyClear: require(         "../assets/images/AiryWeatherIcons/mostly-clear.png"),
+    partlyCloudy: require(        "../assets/images/AiryWeatherIcons/partly-cloudy.png"),
+    overcast: require(            "../assets/images/AiryWeatherIcons/overcast.png"),
+    fog: require(                 "../assets/images/AiryWeatherIcons/fog.png"),
+    rimeFog: require(             "../assets/images/AiryWeatherIcons/rime-fog.png"),
+    lightDrizzle: require(        "../assets/images/AiryWeatherIcons/light-drizzle.png"),
+    moderateDrizzle: require(     "../assets/images/AiryWeatherIcons/moderate-drizzle.png"),
+    denseDrizzle: require(        "../assets/images/AiryWeatherIcons/dense-drizzle.png"),
+    lightFreezingDrizzle: require("../assets/images/AiryWeatherIcons/light-freezing-drizzle.png"),
+    denseFreezingDrizzle: require("../assets/images/AiryWeatherIcons/dense-freezing-drizzle.png"),
+    lightRain: require(           "../assets/images/AiryWeatherIcons/light-rain.png"),
+    moderateRain: require(        "../assets/images/AiryWeatherIcons/moderate-rain.png"),
+    heavyRain: require(           "../assets/images/AiryWeatherIcons/heavy-rain.png"),
+    lightFreezingRain: require(   "../assets/images/AiryWeatherIcons/light-freezing-rain.png"),
+    heavyFreezingRain: require(   "../assets/images/AiryWeatherIcons/heavy-freezing-rain.png"),
+    slightSnowfall: require(      "../assets/images/AiryWeatherIcons/slight-snowfall.png"),
+    moderateSnowfall: require(    "../assets/images/AiryWeatherIcons/moderate-snowfall.png"),
+    heavySnowfall: require(       "../assets/images/AiryWeatherIcons/heavy-snowfall.png"),
+    thunderstorm: require(        "../assets/images/AiryWeatherIcons/thunderstorm.png"),
+    thunderstormWithHail: require("../assets/images/AiryWeatherIcons/thunderstorm-with-hail.png"),
 };
 
 const WEATHER_CODE_INFO: Record<number, WeatherInfo> = {
