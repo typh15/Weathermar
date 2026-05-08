@@ -407,6 +407,7 @@ const todaybox = StyleSheet.create({
         borderWidth: 4,
         margin:2,
         flexDirection: 'row',
+        alignItems: 'center',
     },
 
     highlightsinner: {
@@ -425,9 +426,9 @@ const todaybox = StyleSheet.create({
     
     temptext: {
         fontSize:32,
+        lineHeight: 36,
         marginLeft: 16,
-        textAlign: 'center',
-        textAlignVertical: 'center',
+        textAlign: 'center'
     },
     
     daydatetext: {
@@ -448,7 +449,6 @@ const todaybox = StyleSheet.create({
         textAlign: 'center',
     },
 });
-
 
 
 
