@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 const update_interval = 1 ; // N minutes
     type WeatherInfo = {
@@ -118,6 +118,27 @@ const hourly_data_default = [
     { key: 24, day: "Tuesday", date: "4/21/2025", time: "11:00 pm", temp: 68, feelslike: 67, rainchance: 12, humidity: 78 , windspeed: 5, winddirection: "SE", weathercode: 8},
 ];
 
+function angleToCompass(angle: number): string {
+    const normalizedAngle = ((angle % 360) + 360) % 360;
+
+    if (normalizedAngle >= 337.5 || normalizedAngle < 22.5) {
+        return "N";
+    } else if (normalizedAngle < 67.5) {
+        return "NE";
+    } else if (normalizedAngle < 112.5) {
+        return "E";
+    } else if (normalizedAngle < 157.5) {
+        return "SE";
+    } else if (normalizedAngle < 202.5) {
+        return "S";
+    } else if (normalizedAngle < 247.5) {
+        return "SW";
+    } else if (normalizedAngle < 292.5) {
+        return "W";
+    } else {
+        return "NW";
+    }
+}
 
 type HourlyProps = {
     day: string;
@@ -148,6 +169,7 @@ function HourlyRow({time, temp, feelslike, rainchance, humidity, windspeed, wind
                 </ThemedText>
             </ThemedView>
 
+            
             <ThemedView style={hourlyStyles.rightColumn}>
                 <ThemedText style={hourlyStyles.detailText}>
                     Feels Like: {feelslike}{"\u00B0"}F
@@ -162,8 +184,9 @@ function HourlyRow({time, temp, feelslike, rainchance, humidity, windspeed, wind
                 </ThemedText>
 
                 <ThemedText style={hourlyStyles.detailText}>
-                    Wind: {windspeed} mph {winddirection}
+                    Wind: {windspeed} mph from {angleToCompass(Number(winddirection))}
                 </ThemedText>
+                <ImageOverlay angle={ Number(winddirection)} />
 
                 <ThemedText style={hourlyStyles.detailText}>
                     Summary: {getWeatherInfo(weathercode).summary}
@@ -173,7 +196,42 @@ function HourlyRow({time, temp, feelslike, rainchance, humidity, windspeed, wind
     );
 }
 
+const arrowSize = 80;
 
+const ImageOverlay = ({angle}: { angle: number }) => {
+    return (
+        <View
+            style={{
+                width: 140,
+                height: 68,
+                justifyContent: 'center',
+                alignItems: 'center',
+                position: 'relative',
+            }}
+        >
+            <Image
+                source={require("../assets/images/WindArrowFrame.png")}
+                style={{
+                    position: 'absolute',
+                    width: 64,
+                    height: 64,
+                    resizeMode: 'contain',
+                }}
+            />
+
+            <Image
+                source={require("../assets/images/WindArrowOnly.png")}
+                style={{
+                    position: 'absolute',
+                    width: 32,
+                    height: 12,
+                    resizeMode: 'contain',
+                    transform: [{ rotate: `${90+angle}deg` }],
+                }}
+            />
+        </View>
+    );
+};
 
 function LoadingHourlyRow() {
     return (
@@ -420,7 +478,6 @@ export default function HomeScreen() {
                 <ThemedText style={screenstyles.sectiontitle}>
                     Hourly Forecast for {selectedDateLabel}
                 </ThemedText>
-
                 {forecastContent}
                 
 
