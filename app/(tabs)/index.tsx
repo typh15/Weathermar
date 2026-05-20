@@ -6,6 +6,11 @@ import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 
+const current_background_color = '#0e6955';
+const current_border_color = '#1fb47a';
+
+const forecast_background_color = '#306082';
+const forecast_border_color = '#5fcde4';
 
 const update_interval = 10 ; // N minutes
 
@@ -103,6 +108,7 @@ function CurrentWeatherSection({location, day, date, time, currenttemp, feelslik
     return (
         <Pressable onPress={onPress}>
             <ThemedView style={todaybox.outertodaycard}>  
+                
                 <ThemedText style={todaybox.daydatetext}>
                     {location}{"\n"}
                     {time}, {day} - {date}
@@ -321,7 +327,7 @@ export default function HomeScreen() {
                                                 lowtemp={currentWeatherData.lowtemp}
                                                 onPress={() => router.push({
                                                     pathname: '../../hourly',
-                                                    params: { date: currentWeatherData.date }
+                                                    params: { date: currentWeatherData.date, currentday: 'true'  }
                                                 })} />;
 
         forecastContent = forecastData.map((forecast) => (
@@ -334,7 +340,7 @@ export default function HomeScreen() {
             rainchance={forecast.rainchance}
             onPress={() => router.push({
                 pathname: '../../hourly',
-                params: { date: forecast.date }
+                params: { date: forecast.date, currentday: 'false' }
             })} 
         />
       ));
@@ -385,8 +391,8 @@ const todaybox = StyleSheet.create({
         padding: 0,
         gap: 0,
         marginBottom: 16,
-        backgroundColor: '#0e6955',
-        borderColor: '#1fb47a',
+        backgroundColor: current_background_color,
+        borderColor: current_border_color,
         borderWidth: 4,
         marginLeft:8,
         marginRight:8,
@@ -395,15 +401,15 @@ const todaybox = StyleSheet.create({
     innertodaycard: {
         padding: 8,
         gap: 4,
-        backgroundColor: '#0e6955',
+        backgroundColor: current_background_color,
         margin:0,
     },
 
     highlights: {
         padding: 4,
         gap: 2,
-        backgroundColor: '#0e6955',
-        borderColor: '#1fb47a',
+        backgroundColor: current_background_color,
+        borderColor: current_border_color,
         borderWidth: 4,
         margin:2,
         flexDirection: 'row',
@@ -413,14 +419,20 @@ const todaybox = StyleSheet.create({
     highlightsinner: {
         padding: 4,
         gap: 2,
-        backgroundColor: '#0e6955',
+        backgroundColor: current_background_color,
         margin:2,
     },
 
     details: {
         padding: 4,
         gap: 2,
-        backgroundColor: '#0e6955',
+        backgroundColor: current_background_color,
+        margin:2,
+    },
+
+    empty: {
+        padding: 2,
+        gap: 2,
         margin:2,
     },
     
@@ -451,15 +463,14 @@ const todaybox = StyleSheet.create({
 });
 
 
-
 const weatherbox = StyleSheet.create({
 
   weathercard: {
     padding: 8,
     gap: 4,
     marginBottom: 16,
-    backgroundColor: '#306082',
-    borderColor: '#5fcde4',
+    backgroundColor: forecast_background_color,
+    borderColor: forecast_border_color,
     borderWidth: 4,
     marginLeft:32,
     marginRight:32,

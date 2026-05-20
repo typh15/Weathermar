@@ -6,16 +6,22 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+
+const current_background_color = '#0e6955';
+const current_border_color = '#1fb47a';
+
+const forecast_background_color = '#306082';
+const forecast_border_color = '#5fcde4';
+
+var background_color = '#0e6955';
+var border_color = '#1fb47a';
+
+
 const update_interval = 1 ; // N minutes
     type WeatherInfo = {
         summary: string;
         icon: any;
 };
-
-const TestweatherIcons = {
-  clear: require(                 "../assets/images/AiryWeatherIcons/clear.png"),
-};
-
 
 const weatherIcons = {
     clear: require(               "../assets/images/AiryWeatherIcons/clear.png"),
@@ -155,40 +161,40 @@ type HourlyProps = {
 
 function HourlyRow({time, temp, feelslike, rainchance, humidity, windspeed, winddirection, weathercode }: HourlyProps) {
     return (
-        <ThemedView style={hourlyStyles.rowCard}>
-            <ThemedView style={hourlyStyles.leftColumn}>
-                <ThemedText style={hourlyStyles.timeText}>
+        <ThemedView style={colorSchemeHourlyStyles(background_color, border_color).rowCard}>
+            <ThemedView style={colorSchemeHourlyStyles(background_color, border_color).leftColumn}>
+                <ThemedText style={colorSchemeHourlyStyles(background_color, border_color).timeText}>
                     {time}
                 </ThemedText>
 
 
-                <Image source={WEATHER_CODE_INFO[weathercode].icon} style={hourlyStyles.icon} />
+                <Image source={WEATHER_CODE_INFO[weathercode].icon} style={colorSchemeHourlyStyles(background_color, border_color).icon} />
 
-                <ThemedText style={hourlyStyles.tempText}>
+                <ThemedText style={colorSchemeHourlyStyles(background_color, border_color).tempText}>
                     {temp}{"\u00B0"}F
                 </ThemedText>
             </ThemedView>
 
-            
-            <ThemedView style={hourlyStyles.rightColumn}>
-                <ThemedText style={hourlyStyles.detailText}>
+
+            <ThemedView style={colorSchemeHourlyStyles(background_color, border_color).rightColumn}>
+                <ThemedText style={colorSchemeHourlyStyles(background_color, border_color).detailText}>
                     Feels Like: {feelslike}{"\u00B0"}F
                 </ThemedText>
 
-                <ThemedText style={hourlyStyles.detailText}>
+                <ThemedText style={colorSchemeHourlyStyles(background_color, border_color).detailText}>
                     Precip Chance: {rainchance}%
                 </ThemedText>
 
-                <ThemedText style={hourlyStyles.detailText}>
+                <ThemedText style={colorSchemeHourlyStyles(background_color, border_color).detailText}>
                     Humidity: {humidity}%
                 </ThemedText>
 
-                <ThemedText style={hourlyStyles.detailText}>
+                <ThemedText style={colorSchemeHourlyStyles(background_color, border_color).detailText}>
                     Wind: {windspeed} mph from {angleToCompass(Number(winddirection))}
                 </ThemedText>
                 <ImageOverlay angle={ Number(winddirection)} />
 
-                <ThemedText style={hourlyStyles.detailText}>
+                <ThemedText style={colorSchemeHourlyStyles(background_color, border_color).detailText}>
                     Summary: {getWeatherInfo(weathercode).summary}
                 </ThemedText>
             </ThemedView>
@@ -235,8 +241,8 @@ const ImageOverlay = ({angle}: { angle: number }) => {
 
 function LoadingHourlyRow() {
     return (
-        <ThemedView style={hourlyStyles.rowCard}>
-            <ThemedText style={hourlyStyles.tempText}>
+        <ThemedView style={colorSchemeHourlyStyles(background_color, border_color).rowCard}>
+            <ThemedText style={colorSchemeHourlyStyles(background_color, border_color).tempText}>
                 Loading...
             </ThemedText>
         </ThemedView>
@@ -245,8 +251,8 @@ function LoadingHourlyRow() {
 
 function ErrorHourlyRow() {
     return (
-        <ThemedView style={hourlyStyles.rowCard}>
-            <ThemedText style={hourlyStyles.tempText}>
+        <ThemedView style={colorSchemeHourlyStyles(background_color, border_color).rowCard}>
+            <ThemedText style={colorSchemeHourlyStyles(background_color, border_color).tempText}>
                 Error retrieving hourly data
             </ThemedText>
         </ThemedView>
@@ -309,8 +315,17 @@ export default function HomeScreen() {
     const [HourlyData, setHourlyData] = useState(hourly_data_default);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const { date } = useLocalSearchParams();
+    const { date, currentday } = useLocalSearchParams();
     const router = useRouter();
+
+    if (currentday === "true") {
+        background_color = current_background_color;
+        border_color = current_border_color;
+    }
+    else {        
+        background_color = forecast_background_color;
+        border_color = forecast_border_color;
+    }
     
     function sleep(ms: number) {
         return new Promise((resolve) => setTimeout(resolve, ms));
@@ -403,7 +418,6 @@ export default function HomeScreen() {
 
     const selectedDate = typeof date === 'string' ? date : "";
 
-
     const filteredHourlyData = HourlyData.filter((hourly) => hourly.date === selectedDate);
 
     const now = new Date();
@@ -466,16 +480,16 @@ export default function HomeScreen() {
     console.log("display count =", displayHourlyData.length);
     return (
         <ScrollView>
-            <ThemedView style={screenstyles.screenstyle}>
+            <ThemedView style={colorSchemeScreenStyles(background_color, border_color).screenstyle}>
                 <Pressable onPress={() => router.back()}>
-                    <ThemedView style={screenstyles.backbutton}>
-                        <ThemedText style={screenstyles.backbuttontext}>
+                    <ThemedView style={colorSchemeScreenStyles(background_color, border_color).backbutton}>
+                        <ThemedText style={colorSchemeScreenStyles(background_color, border_color).backbuttontext}>
                             Back
                         </ThemedText>
                     </ThemedView>
                 </Pressable>
                 
-                <ThemedText style={screenstyles.sectiontitle}>
+                <ThemedText style={colorSchemeScreenStyles(background_color, border_color).sectiontitle}>
                     Hourly Forecast for {selectedDateLabel}
                 </ThemedText>
                 {forecastContent}
@@ -490,8 +504,8 @@ export default function HomeScreen() {
     );
 }
 
-
-const screenstyles = StyleSheet.create({
+function colorSchemeScreenStyles(background_color: string, border_color: string) {
+return StyleSheet.create({
     screenstyle: {
         padding: 12,
         borderColor: '#166d69',
@@ -503,11 +517,12 @@ const screenstyles = StyleSheet.create({
     sectiontitle: {
         fontSize: 24,
         marginBottom: 12,
+        marginTop: 12,
         textAlign: 'center',
     },
     backbutton: {
-        backgroundColor: "#0e6955",
-        borderColor: "#1fb47a",
+        backgroundColor: background_color,
+        borderColor: border_color,
         borderWidth: 3,
     },
 
@@ -515,10 +530,11 @@ const screenstyles = StyleSheet.create({
         fontSize: 24,
         textAlign: 'center',
     },
-});
+});}
 
 
-const hourlyStyles = StyleSheet.create({
+function colorSchemeHourlyStyles(background_color: string, border_color: string) {
+return StyleSheet.create({
     rowCard: {
         flexDirection: "row",
         alignItems: "stretch",
@@ -526,8 +542,8 @@ const hourlyStyles = StyleSheet.create({
         marginBottom: 12,
         marginLeft: 16,
         marginRight: 16,
-        backgroundColor: "#0e6955",
-        borderColor: "#1fb47a",
+        backgroundColor: background_color,
+        borderColor: border_color,
         borderWidth: 3,
     },
 
@@ -537,7 +553,7 @@ const hourlyStyles = StyleSheet.create({
         alignItems: "center",
         paddingRight: 5,
         paddingLeft: 5,
-        borderRightColor: "#1fb47a",
+        borderRightColor: border_color,
         borderRightWidth: 2,
     },
 
@@ -568,3 +584,4 @@ const hourlyStyles = StyleSheet.create({
         marginBottom: 8,
     },
 });
+}

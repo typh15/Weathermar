@@ -5,6 +5,11 @@ import { ScrollView, StyleSheet, TextInput, TouchableOpacity } from 'react-nativ
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 
+
+const location_background_color = '#306082';
+const location_border_color = '#5fcde4';
+
+
 type Suggestion = {
   display_name: string;
   lat: number;
@@ -154,8 +159,8 @@ const locationStyles = StyleSheet.create({
     padding: 8,
     gap: 4,
     marginBottom: 16,
-    backgroundColor: '#306082',
-    borderColor: '#5fcde4',
+    backgroundColor: location_background_color,
+    borderColor: location_border_color,
     borderWidth: 4,
     marginLeft: 32,
     marginRight: 32,
